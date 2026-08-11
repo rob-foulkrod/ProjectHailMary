@@ -14,7 +14,7 @@ scroll down and click the "Start exercise on GitHub" button to move to GitHub an
 ### 1. Introduction to GitHub Copilot *(<1 hour)*
 
 - **Develop with AI-powered code suggestions by using GitHub Copilot and VS Code**
-  [Exercise Link](https://learn.microsoft.com/en-us/training/modules/introduction-to-github-copilot/5-exercise/?ns-enrollment-type=learningpath&ns-enrollment-id=learn.github-copilot)
+  [Exercise Link](https://github.com/skills/getting-started-with-github-copilot)
 
 ### 2.  GitHub Copilot (VM LAB 1, VM LAB 3) *(~5 minutes each)*
 
