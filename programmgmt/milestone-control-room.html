@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milestone Control Room</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 20px clamp(18px, 4vw, 64px) 64px; }
+    .topbar { display: flex; justify-content: space-between; gap: 28px; align-items: flex-start; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 9px; color: var(--cp-accent); font-size: 0.73rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 700px; margin-bottom: 7px; font-size: clamp(1.8rem, 3vw, 3.2rem); line-height: 0.98; letter-spacing: -0.045em; font-weight: 760; }
+    .subhead { max-width: 650px; margin-bottom: 0; color: var(--cp-text-muted); font-size: 0.9rem; line-height: 1.4; }
+    .date-lockup { min-width: 190px; border-left: 3px solid var(--cp-accent); padding: 5px 0 5px 16px; }
+    .date-lockup span { display: block; color: var(--cp-text-soft); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .date-lockup strong { display: block; margin-top: 6px; font-size: 1.25rem; }
+    .summary-grid { display: grid; grid-template-columns: 1.55fr repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .summary-card { min-height: 104px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); padding: 14px 16px; box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
+    .summary-card.alert { border-color: var(--cp-danger); background: var(--cp-panel-strong); }
+    .summary-label { display: flex; justify-content: space-between; gap: 12px; color: var(--cp-text-muted); font-size: 0.77rem; font-weight: 750; letter-spacing: 0.06em; text-transform: uppercase; }
+    .summary-value { margin: 9px 0 4px; font-size: 1.9rem; line-height: 1; font-weight: 760; }
+    .summary-card.alert .summary-value { color: var(--cp-danger); }
+    .summary-note { margin: 0; color: var(--cp-text-soft); font-size: 0.84rem; line-height: 1.35; }
+    .signal-dot { width: 10px; height: 10px; margin-top: 3px; border-radius: 50%; background: var(--cp-danger); box-shadow: 0 0 0 4px var(--cp-accent-soft); }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 24px; align-items: start; }
+    .panel { border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-panel); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
+    .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 19px 20px 15px; border-bottom: 1px solid var(--cp-border); }
+    .panel-heading h2 { margin: 0; font-size: 1.05rem; letter-spacing: -0.015em; }
+    .panel-heading span { color: var(--cp-text-soft); font-size: 0.82rem; }
+    .filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; padding: 14px 20px; border-bottom: 1px solid var(--cp-border); background: var(--cp-surface-soft); }
+    .filters label { color: var(--cp-text-soft); font-size: 0.7rem; font-weight: 750; letter-spacing: 0.05em; text-transform: uppercase; }
+    .filters select { width: 100%; margin-top: 6px; border: 1px solid var(--cp-border-strong); border-radius: 10px; background: var(--cp-surface); color: var(--cp-text); padding: 8px 9px; font-size: 0.82rem; }
+    .milestone-list { display: grid; gap: 10px; padding: 14px; }
+    .milestone-row { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(190px, 0.8fr) 112px 32px; gap: 16px; align-items: center; border: 1px solid var(--cp-border); border-radius: 12px; background: var(--cp-surface); padding: 16px; transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+    .milestone-row:hover, .milestone-row:focus-within { border-color: var(--cp-accent); transform: translateY(-1px); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+    .milestone-row.overdue { border-left: 4px solid var(--cp-danger); }
+    .milestone-row.upcoming { border-left: 4px solid var(--cp-success); }
+    .milestone-title { display: flex; align-items: flex-start; gap: 10px; }
+    .milestone-title h3 { margin: 0 0 5px; font-size: 0.98rem; }
+    .milestone-title p { margin: 0; color: var(--cp-text-muted); font-size: 0.81rem; line-height: 1.35; }
+    .health { flex: 0 0 auto; width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; }
+    .health.green { background: var(--cp-success); }
+    .health.yellow { background: var(--cp-warning); }
+    .health.red { background: var(--cp-danger); }
+    .progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: var(--cp-surface-soft); }
+    .progress-fill { height: 100%; border-radius: inherit; background: var(--cp-accent); }
+    .progress-meta { display: flex; justify-content: space-between; margin-top: 7px; color: var(--cp-text-soft); font-size: 0.74rem; }
+    .date-cell { font-size: 0.82rem; }
+    .date-cell strong { display: block; margin-bottom: 4px; }
+    .date-cell small { color: var(--cp-text-soft); }
+    .date-cell.overdue strong { color: var(--cp-danger); }
+    .date-cell.upcoming strong { color: var(--cp-success); }
+    .open-drawer { width: 30px; height: 30px; border: 1px solid var(--cp-border); border-radius: 50%; background: var(--cp-surface); color: var(--cp-accent); font-size: 1.1rem; line-height: 1; }
+    .open-drawer:hover { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .sidebar { display: grid; gap: 14px; }
+    .side-section { padding: 18px; }
+    .side-section h2 { margin-bottom: 15px; font-size: 0.96rem; }
+    .legend-row, .decision-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 0.82rem; }
+    .legend-row:last-child, .decision-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .legend-row:first-of-type, .decision-row:first-of-type { padding-top: 0; }
+    .legend-chip { width: 10px; height: 10px; border-radius: 50%; }
+    .legend-chip.red { background: var(--cp-danger); }
+    .legend-chip.yellow { background: var(--cp-warning); }
+    .legend-chip.green { background: var(--cp-success); }
+    .decision-row { align-items: flex-start; }
+    .decision-number { display: inline-grid; flex: 0 0 auto; width: 21px; height: 21px; place-items: center; border-radius: 50%; background: var(--cp-accent-soft); color: var(--cp-accent); font-size: 0.72rem; font-weight: 800; }
+    .empty { padding: 38px 20px; color: var(--cp-text-muted); text-align: center; }
+    .drawer-backdrop { position: fixed; inset: 0; z-index: 5; display: none; background: var(--cp-overlay); }
+    .drawer-backdrop.open { display: block; }
+    .drawer { position: fixed; z-index: 6; top: 0; right: 0; width: min(510px, 100%); height: 100%; overflow-y: auto; border-left: 1px solid var(--cp-border); background: var(--cp-panel-strong); padding: 26px; box-shadow: var(--cp-shadow); transform: translateX(100%); transition: transform 220ms ease; }
+    .drawer.open { transform: translateX(0); }
+    .drawer-close { float: right; width: 34px; height: 34px; border: 1px solid var(--cp-border); border-radius: 50%; background: var(--cp-surface); color: var(--cp-text); font-size: 1.2rem; }
+    .drawer-kicker { margin-top: 40px; color: var(--cp-accent); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+    .drawer h2 { max-width: 400px; margin: 8px 0 8px; font-size: 1.75rem; line-height: 1.05; }
+    .drawer-subtitle { color: var(--cp-text-muted); font-size: 0.9rem; line-height: 1.45; }
+    .drawer-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 22px 0; }
+    .drawer-metric { border: 1px solid var(--cp-border); border-radius: 10px; background: var(--cp-surface); padding: 11px; }
+    .drawer-metric span { display: block; color: var(--cp-text-soft); font-size: 0.68rem; font-weight: 750; letter-spacing: 0.05em; text-transform: uppercase; }
+    .drawer-metric strong { display: block; margin-top: 7px; font-size: 1.08rem; }
+    .drawer h3 { margin: 24px 0 10px; font-size: 0.93rem; }
+    .deliverable { border-top: 1px solid var(--cp-border); padding: 12px 0; }
+    .deliverable-head { display: flex; justify-content: space-between; gap: 10px; }
+    .deliverable strong { font-size: 0.87rem; }
+    .deliverable p { margin: 6px 0 0; color: var(--cp-text-muted); font-size: 0.78rem; line-height: 1.4; }
+    .pill { display: inline-flex; align-items: center; white-space: nowrap; border-radius: 99px; padding: 4px 8px; font-size: 0.68rem; font-weight: 800; }
+    .pill.done { background: var(--cp-accent-soft); color: var(--cp-accent); }
+    .pill.blocked { background: var(--cp-highlight); color: var(--cp-danger); }
+    .pill.active { background: var(--cp-surface-soft); color: var(--cp-text-muted); }
+    .drawer-note { margin-top: 20px; border-left: 3px solid var(--cp-warning); background: var(--cp-accent-soft); padding: 12px 14px; color: var(--cp-text-muted); font-size: 0.82rem; line-height: 1.45; }
+    @media (max-width: 1050px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .summary-card.alert { grid-column: span 2; }
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .shell { padding: 22px 14px 44px; }
+      .topbar { display: block; }
+      .date-lockup { margin-top: 20px; }
+      .summary-grid, .sidebar { grid-template-columns: 1fr; }
+      .summary-card.alert { grid-column: auto; }
+      .filters { grid-template-columns: repeat(2, 1fr); padding: 12px; }
+      .milestone-row { grid-template-columns: 1fr 30px; gap: 12px; padding: 14px; }
+      .milestone-row > :nth-child(2), .milestone-row > :nth-child(3) { grid-column: 1; }
+      .milestone-row > :nth-child(4) { grid-column: 2; grid-row: 1 / span 3; }
+      .drawer { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Project Hail Mary / Delivery review</p>
+        <h1>Milestone Control Room</h1>
+        <p class="subhead">A fixed-date view of what is due next, what has slipped, and which deliverables need a decision.</p>
+      </div>
+      <div class="date-lockup" aria-label="Dashboard reporting date">
+        <span>Reporting date</span>
+        <strong>August 11, 2026</strong>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="Milestone summary">
+      <article class="summary-card alert">
+        <div class="summary-label"><span>Overdue release</span><span class="signal-dot" aria-hidden="true"></span></div>
+        <div class="summary-value">1</div>
+        <p class="summary-note">Engineering Reliability is 4 days late with two high-risk deliverables.</p>
+      </article>
+      <article class="summary-card">
+        <div class="summary-label"><span>Upcoming</span></div>
+        <div class="summary-value">4</div>
+        <p class="summary-note">Milestones due within the next 14 days.</p>
+      </article>
+      <article class="summary-card">
+        <div class="summary-label"><span>Deliverables</span></div>
+        <div class="summary-value">8<span style="font-size: 1rem; color: var(--cp-text-soft);"> / 16</span></div>
+        <p class="summary-note">Half of the tracked work is complete.</p>
+      </article>
+      <article class="summary-card">
+        <div class="summary-label"><span>Blocked</span></div>
+        <div class="summary-value">3</div>
+        <p class="summary-note">Waiting on access evidence, triage, or a release decision.</p>
+      </article>
+    </section>
+
+    <div class="workspace">
+      <section class="panel" aria-labelledby="milestone-heading">
+        <div class="panel-heading">
+          <div><h2 id="milestone-heading">Milestone delivery</h2><span>Upcoming and overdue commitments</span></div>
+          <span id="result-count">6 milestones</span>
+        </div>
+        <div class="filters" aria-label="Filter milestone data">
+          <label>Milestone<select id="milestone-filter"><option value="all">All milestones</option></select></label>
+          <label>Timing<select id="timing-filter"><option value="all">All timing</option><option value="overdue">Overdue</option><option value="upcoming">Upcoming</option></select></label>
+          <label>Team<select id="team-filter"><option value="all">All teams</option></select></label>
+          <label>Status<select id="status-filter"><option value="all">All statuses</option><option value="in progress">In progress</option><option value="blocked">Blocked</option><option value="ready">Ready</option><option value="completed">Completed</option></select></label>
+        </div>
+        <div id="milestone-list" class="milestone-list"></div>
+      </section>
+
+      <aside class="sidebar" aria-label="Management signals">
+        <section class="panel side-section">
+          <h2>Health legend</h2>
+          <div class="legend-row"><span class="legend-chip red"></span><span><strong>Red</strong> needs intervention</span></div>
+          <div class="legend-row"><span class="legend-chip yellow"></span><span><strong>Yellow</strong> needs attention</span></div>
+          <div class="legend-row"><span class="legend-chip green"></span><span><strong>Green</strong> on plan</span></div>
+        </section>
+        <section class="panel side-section">
+          <h2>Decisions to surface</h2>
+          <div class="decision-row"><span class="decision-number">1</span><span>Confirm an owner and access inventory for the overdue reliability release.</span></div>
+          <div class="decision-row"><span class="decision-number">2</span><span>Decide whether added enhancement scope stays in the August release.</span></div>
+          <div class="decision-row"><span class="decision-number">3</span><span>Protect quality capacity for the remaining test coverage work.</span></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="detail-drawer" class="drawer" aria-labelledby="drawer-title" aria-hidden="true">
+    <button id="drawer-close" class="drawer-close" type="button" aria-label="Close milestone details">&times;</button>
+    <p class="drawer-kicker">Milestone detail</p>
+    <h2 id="drawer-title"></h2>
+    <p id="drawer-subtitle" class="drawer-subtitle"></p>
+    <div id="drawer-metrics" class="drawer-metrics"></div>
+    <h3>Deliverables</h3>
+    <div id="drawer-deliverables"></div>
+    <div id="drawer-note" class="drawer-note"></div>
+  </aside>
+
+  <script>
+    const DEMO_DATE = "2026-08-11T00:00:00";
+    // DATA_START
+    const milestones = [
+      {
+        id: "release-1-1-engineering-reliability", name: "Release 1.1 - Engineering Reliability", description: "Overdue release containing environment reliability work.", date: "2026-08-07", health: "red", team: "Platform Engineering", forecast: "Low", note: "Overdue as of the August 11 reporting date. Issue #7 is blocked pending the platform deployment-permission inventory. Related issues are grouped by outcome because GitHub currently has no direct milestone assignments.", deliverables: [
+          { title: "Investigate Rocky environment access", issue: "#7", status: "blocked", team: "Platform Engineering", date: "2026-08-13", detail: "Waiting for the deployment-permission inventory and confirmation of the approved access boundary; next review is August 13." },
+          { title: "Add engineering environment access guard", issue: "#8", status: "ready", team: "Platform Engineering", date: "2026-08-07", detail: "Ready to define and automate the expected environment-access boundary." }
+        ]
+      },
+      {
+        id: "release-1-0-pizza-ordering", name: "Release 1.0 - Pizza Ordering", description: "Upcoming release for core pizza ordering improvements.", date: "2026-08-21", health: "green", team: "Pizza Experience", forecast: "High", note: "Initiative #13 reports Green and core documentation and test work is underway. Issue #10 remains blocked pending triage and should remain outside committed scope until resolved. Related issues are grouped by outcome because GitHub currently has no direct milestone assignments.", deliverables: [
+          { title: "Document PizzaSales quick start", issue: "#5", status: "completed", team: "Pizza Experience", date: "2026-08-11", detail: "Quick-start documentation was completed and verified from a clean checkout." },
+          { title: "Document testing and contribution workflow", issue: "#6", status: "in progress", team: "Pizza Experience", date: "2026-08-21", detail: "Configuration, testing, contribution, and project-expectation guidance is actively underway." },
+          { title: "Triage Princess Donut feature requests", issue: "#9", status: "in progress", team: "Pizza Experience", date: "2026-08-21", detail: "Requests are being grouped and ranked into an agreed implementation backlog." },
+          { title: "Implement first Princess Donut enhancement", issue: "#10", status: "blocked", team: "Pizza Experience", date: "2026-08-14", detail: "Waiting for request triage to identify the first approved enhancement; next review is August 14." },
+          { title: "Add automated tests for menu workflow", issue: "#11", status: "ready", team: "Quality Engineering", date: "2026-08-21", detail: "Ready to establish the test project and cover valid and invalid menu selections." },
+          { title: "Add automated tests for pizza actions", issue: "#12", status: "in progress", team: "Quality Engineering", date: "2026-08-21", detail: "Automated coverage for Add, Review, and Quit behavior is actively underway." }
+        ]
+      }
+    ];
+    // DATA_END
+
+    const elements = {
+      list: document.getElementById("milestone-list"),
+      count: document.getElementById("result-count"),
+      milestoneFilter: document.getElementById("milestone-filter"),
+      timingFilter: document.getElementById("timing-filter"),
+      teamFilter: document.getElementById("team-filter"),
+      statusFilter: document.getElementById("status-filter"),
+      backdrop: document.getElementById("drawer-backdrop"),
+      drawer: document.getElementById("detail-drawer"),
+      drawerTitle: document.getElementById("drawer-title"),
+      drawerSubtitle: document.getElementById("drawer-subtitle"),
+      drawerMetrics: document.getElementById("drawer-metrics"),
+      drawerDeliverables: document.getElementById("drawer-deliverables"),
+      drawerNote: document.getElementById("drawer-note")
+    };
+
+    const demoTime = new Date(DEMO_DATE).getTime();
+    const daysFromDemo = (date) => Math.round((new Date(`${date}T00:00:00`).getTime() - demoTime) / 86400000);
+    const formatDate = (date) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(`${date}T00:00:00`));
+    const timing = (milestone) => daysFromDemo(milestone.date) < 0 ? "overdue" : "upcoming";
+    const progress = (milestone) => {
+      const completed = milestone.deliverables.filter((item) => item.status === "completed").length;
+      return { completed, total: milestone.deliverables.length, percentage: Math.round((completed / milestone.deliverables.length) * 100) };
+    };
+    const timingText = (date) => {
+      const days = daysFromDemo(date);
+      if (days < 0) return `${Math.abs(days)} days overdue`;
+      if (days === 0) return "Due today";
+      return `Due in ${days} days`;
+    };
+
+    function fillFilters() {
+      milestones.forEach((milestone) => elements.milestoneFilter.insertAdjacentHTML("beforeend", `<option value="${milestone.id}">${milestone.name}</option>`));
+      [...new Set(milestones.map((milestone) => milestone.team))].forEach((team) => elements.teamFilter.insertAdjacentHTML("beforeend", `<option value="${team}">${team}</option>`));
+    }
+
+    function render() {
+      const milestoneValue = elements.milestoneFilter.value;
+      const timingValue = elements.timingFilter.value;
+      const teamValue = elements.teamFilter.value;
+      const statusValue = elements.statusFilter.value;
+      const visible = milestones.filter((milestone) => {
+        const statusMatch = statusValue === "all" || milestone.deliverables.some((item) => item.status === statusValue);
+        return (milestoneValue === "all" || milestone.id === milestoneValue) &&
+          (timingValue === "all" || timing(milestone) === timingValue) &&
+          (teamValue === "all" || milestone.team === teamValue) && statusMatch;
+      });
+      elements.count.textContent = `${visible.length} milestone${visible.length === 1 ? "" : "s"}`;
+      if (!visible.length) {
+        elements.list.innerHTML = `<div class="empty">No milestones match these filters.</div>`;
+        return;
+      }
+      elements.list.innerHTML = visible.map((milestone) => {
+        const currentTiming = timing(milestone);
+        const currentProgress = progress(milestone);
+        return `<article class="milestone-row ${currentTiming}" data-id="${milestone.id}">
+          <div class="milestone-title"><span class="health ${milestone.health}" aria-label="${milestone.health} health"></span><div><h3>${milestone.name}</h3><p>${milestone.description}</p></div></div>
+          <div><div class="progress-track" aria-label="${currentProgress.percentage}% complete"><div class="progress-fill" style="width: ${currentProgress.percentage}%"></div></div><div class="progress-meta"><span>${currentProgress.completed} of ${currentProgress.total} complete</span><span>${currentProgress.percentage}%</span></div></div>
+          <div class="date-cell ${currentTiming}"><strong>${formatDate(milestone.date)}</strong><small>${timingText(milestone.date)}</small></div>
+          <button class="open-drawer" type="button" data-open="${milestone.id}" aria-label="Open ${milestone.name} details">&rarr;</button>
+        </article>`;
+      }).join("");
+      document.querySelectorAll("[data-open]").forEach((button) => button.addEventListener("click", () => openDrawer(button.dataset.open)));
+    }
+
+    function openDrawer(id) {
+      const milestone = milestones.find((item) => item.id === id);
+      const currentProgress = progress(milestone);
+      elements.drawerTitle.textContent = milestone.name;
+      elements.drawerSubtitle.textContent = milestone.description;
+      elements.drawerMetrics.innerHTML = `<div class="drawer-metric"><span>Progress</span><strong>${currentProgress.completed}/${currentProgress.total}</strong></div><div class="drawer-metric"><span>Target</span><strong>${formatDate(milestone.date)}</strong></div><div class="drawer-metric"><span>Forecast</span><strong>${milestone.forecast}</strong></div>`;
+      elements.drawerDeliverables.innerHTML = milestone.deliverables.map((item) => `<div class="deliverable"><div class="deliverable-head"><strong>${item.title} <span>${item.issue}</span></strong><span class="pill ${item.status === "completed" ? "done" : item.status === "blocked" ? "blocked" : "active"}">${item.status}</span></div><p>${item.team} · ${formatDate(item.date)} · ${item.detail}</p></div>`).join("");
+      elements.drawerNote.textContent = milestone.note;
+      elements.backdrop.classList.add("open");
+      elements.drawer.classList.add("open");
+      elements.drawer.setAttribute("aria-hidden", "false");
+      document.getElementById("drawer-close").focus();
+    }
+
+    function closeDrawer() {
+      elements.backdrop.classList.remove("open");
+      elements.drawer.classList.remove("open");
+      elements.drawer.setAttribute("aria-hidden", "true");
+    }
+
+    fillFilters();
+    render();
+    [elements.milestoneFilter, elements.timingFilter, elements.teamFilter, elements.statusFilter].forEach((filter) => filter.addEventListener("change", render));
+    document.getElementById("drawer-close").addEventListener("click", closeDrawer);
+    elements.backdrop.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeDrawer(); });
+  </script>
+</body>
+</html>
