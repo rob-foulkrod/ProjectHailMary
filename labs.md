@@ -30,7 +30,7 @@ scroll down and click the "Start exercise on GitHub" button to move to GitHub an
   Enable Copilot cloud agent, assign and monitor issues, review its work, provide feedback, customize its workspace, and delegate multiple tasks in parallel.
   [Exercise Link](https://github.com/skills/expand-your-team-with-copilot)
 
-### 4. Create Applications with the Copilot CLI (VM LAB 11) **new** *(<60 minutes)*
+### 4. Create Applications with the Copilot CLI (VM LAB 11) **Requires Paid Account** *(<60 minutes)*
 
 - **Manage issues and build an application from the command line**
   Install the standalone Copilot CLI, create an issue from a template, and iteratively build a Node.js calculator application with Copilot.
@@ -84,7 +84,7 @@ scroll down and click the "Start exercise on GitHub" button to move to GitHub an
   Set up a GitHub MCP server, delegate Copilot to research projects and open issues, then implement a feature from idea to pull request.
   [Exercise Link](https://github.com/skills/integrate-mcp-with-copilot)
 
-### 11. GitHub Copilot Code Review (VM LAB 7) **new** *(<1 hour)*
+### 11. GitHub Copilot Code Review (VM LAB 7) **Required Paid Account** *(<1 hour)*
 
 - **Use and customize GitHub Copilot code review**
   Review code in VS Code and pull requests, add repository-specific review instructions, and configure automatic reviews with repository rulesets.
@@ -103,3 +103,8 @@ scroll down and click the "Start exercise on GitHub" button to move to GitHub an
   Use spec-driven development with GitHub Spec Kit and GitHub Copilot to generate a constitution, specification, plan, and tasks, then implement an MVP feature for an existing .NET application.
   [Exercise Link](https://microsoftlearning.github.io/mslearn-github-copilot-dev/Instructions/Labs/LAB_AK_14_implement-spec-driven-development.html)
 
+### 14. Agent Build
+
+- **Build applications with GitHub Copilot agent mode**
+  People love how GitHub Copilot helps them write code faster and with fewer errors. But what if GitHub could create a multi-tier application with a presentation, logic, and data layers  based on requirements written in natural language? In this exercise, we will prompt GitHub Copilot agent mode to create a complete application.
+[Exercise Link](https://github.com/skills/build-applications-w-copilot-agent-mode)
